@@ -42,6 +42,7 @@ def get_members():
 @app.route('/members', methods=['POST'])
 def add_members():
     data = request.get_json()
+    print(data)
     
     name = data['name']
     details = data['details']
@@ -54,6 +55,11 @@ def add_members():
     INSERT INTO member (name, details, title, level)
     VALUES (%s, %s, %s, %s)
     """
+    
+    cursor.execute(query, (name, details, title, level))
+    db.commit()
+    return jsonify({"message": "Member added successfully"})
+    
     
 # PUT members API that updates a member's name, details, title, and/or level
 @app.route('/members/<int:id>', methods=['PUT'])
@@ -79,3 +85,18 @@ def update_member(id):
     db.commit()
     
     return jsonify({"message": "Member updated"})
+
+# DELETE member API if a member needs to be deleted from the database
+@app.route('/members/<int:id>', methods=['DELETE'])
+def delete_member(id):
+    cursor = db.cursor()
+    
+    query = "DELETE FROM member WHERE id=%s"
+    
+    cursor.execute(query, (id,))
+    db.commit()
+    
+    return jsonify({"message": "Member deleted"})
+
+if __name__ == '__main__':
+    app.run()
