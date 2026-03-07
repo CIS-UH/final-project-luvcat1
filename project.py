@@ -138,7 +138,7 @@ def get_events():
     return jsonify(events)
 
 # UPDATE events API to update existing events
-@app.route('/events/<int:id>', methids=['PUT'])
+@app.route('/events/<int:id>', methods=['PUT'])
 def update_event(id):
     data = request.get_json()
     
@@ -171,3 +171,59 @@ def delete_event(id):
     db.commit()
     
     return jsonify({"message": "Event deleted successfully"})
+
+# all registration API below
+
+# POST registration API to create registration
+@app.route('/registrations', methods=['POST'])
+def add_registration():
+    data = request.get_json()
+    
+    cursor = db.cursor()
+    
+    query = """
+    INSERT INTO registration (event_id, member_id)
+    VALUES (%s, %s)
+    """
+    
+    cursor.execute(query, (
+        data['event_id'],
+        data['member_id']
+    ))
+    
+    db.commit()
+
+    return jsonify({"message": "Registration successful"})
+
+# GET registration API to view registration
+@app.route('/registrations', methods=['GET'])
+def get_registrations():
+    cursor = db.cursor(dictionary=True)
+    
+    query = """
+    SELECT
+        registration.id,
+        member.name AS member_name,
+        event.name AS event_name,
+        event.date
+    FROM registration
+    JOIN member ON registration.member_id = member.id
+    JOIN event ON registration.event_id = event.id
+    """
+    
+    cursor.execute(query)
+    
+    registrations = cursor.fetchall()
+    
+    return jsonify(registrations)
+
+# DELETE registration API to cancel registration
+@app.route('/registrations/<int:id>', methods=['DELETE'])
+def delete_registration(id):
+    cursor = db.cursor()
+    
+    cursor.execute("DELETE FROM registration WHERE id = %s", (id,))
+    
+    db.commit()
+    
+    return jsonify({"message": "Registration deleted"})

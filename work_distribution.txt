@@ -1,3 +1,5 @@
 the work distribution was even among both users, Ngan Tran & Vincent Dao
 
-Ngan worked on the MySQL database, as well as 
+Ngan worked on the MySQL database, as well as the code to connect to the MySQL database. She also tested the connection between MySQL and the REST API.
+
+Vincent worked on the APIs, and proofread the MySQL database to make sure that the API would interact with the database.
