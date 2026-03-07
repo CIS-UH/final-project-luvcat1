@@ -37,3 +37,45 @@ def get_members():
     cursor.execute("SELECT * FROM member")
     members = cursor.fetchall()
     return jsonify(members)
+
+# POST members API that includes their name, details, title, and level
+@app.route('/members', methods=['POST'])
+def add_members():
+    data = request.get_json()
+    
+    name = data['name']
+    details = data['details']
+    title = data['title']
+    level = data['level']
+    
+    cursor = db.cursor()
+    
+    query = """
+    INSERT INTO member (name, details, title, level)
+    VALUES (%s, %s, %s, %s)
+    """
+    
+# PUT members API that updates a member's name, details, title, and/or level
+@app.route('/members/<int:id>', methods=['PUT'])
+def update_member(id):
+    data = request.get_json()
+    
+    cursor = db.cursor()
+    
+    query = """
+    UPDATE member
+    SET name=%s, details=%s, title=%s, level=%s
+    WHERE id=%s
+    """
+    
+    cursor.execute(query, (
+        data['name'],
+        data['details'],
+        data['title'],
+        data['level'],
+        id
+    ))
+    
+    db.commit()
+    
+    return jsonify({"message": "Member updated"})
