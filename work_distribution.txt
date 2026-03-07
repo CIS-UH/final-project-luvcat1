@@ -1,0 +1,3 @@
+the work distribution was even among both users, Ngan Tran & Vincent Dao
+
+Ngan worked on the MySQL database, as well as 

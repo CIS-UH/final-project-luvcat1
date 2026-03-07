@@ -30,6 +30,8 @@ DB_NAME = 'cis2368springdb'
 # creates the connection to the MySQL database
 db = create_con(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 
+# all member API below
+
 # GET members API
 @app.route('/members', methods=['GET'])
 def get_members():
@@ -42,7 +44,6 @@ def get_members():
 @app.route('/members', methods=['POST'])
 def add_members():
     data = request.get_json()
-    print(data)
     
     name = data['name']
     details = data['details']
@@ -100,3 +101,73 @@ def delete_member(id):
 
 if __name__ == '__main__':
     app.run()
+    
+# all event API below
+
+# POST event API to create events
+@app.route('/events', methods=['POST'])
+def add_event():
+    data = request.get_json()
+    
+    cursor = db.cursor()
+    
+    query = """
+    INSERT INTO event (name, date, location)
+    VALUES (%s, %s, %s)
+    """
+    
+    cursor.execute(query, (
+        data['name'],
+        data['date'],
+        data['location']
+    ))
+    
+    db.commit()
+    
+    return jsonify({"message": "Event created successfully"})
+
+# GET events API to retrieve all events
+@app.route('/events', methods=['GET'])
+def get_events():
+    cursor = db.cursor(dictionary=True)
+    
+    cursor.execute("SELECT * FROM event")
+    
+    events = cursor.fetchall()
+    
+    return jsonify(events)
+
+# UPDATE events API to update existing events
+@app.route('/events/<int:id>', methids=['PUT'])
+def update_event(id):
+    data = request.get_json()
+    
+    cursor = db.cursor()
+    
+    query = """
+    UPDATE event
+    SET name=%s, date=%s, location=%s
+    WHERE id=%s
+    """
+    
+    cursor.execute(query, (
+        data['name'],
+        data['date'],
+        data['location'],
+        id
+    ))
+    
+    db.commit()
+    
+    return jsonify({"message": "Event updated successfully"})
+
+# DELETE events API to delete existing events
+@app.route('/events/<int:id>', methods=['DELETE'])
+def delete_event(id):
+    cursor = db.cursor()
+    
+    cursor.execute("DELETE FROM event WHERE id = %s", (id,))
+    
+    db.commit()
+    
+    return jsonify({"message": "Event deleted successfully"})
