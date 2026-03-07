@@ -26,3 +26,14 @@ DB_HOST = 'cis2368spring.cyzsyemwuyp7.us-east-1.rds.amazonaws.com'
 DB_USER = 'admin'
 DB_PASSWORD = '8Iw&6FxI'
 DB_NAME = 'cis2368springdb'
+
+# creates the connection to the MySQL database
+db = create_con(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
+
+# GET members API
+@app.route('/members', methods=['GET'])
+def get_members():
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM member")
+    members = cursor.fetchall()
+    return jsonify(members)
