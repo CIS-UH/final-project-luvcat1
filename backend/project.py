@@ -98,9 +98,6 @@ def delete_member(id):
     db.commit()
     
     return jsonify({"message": "Member deleted"})
-
-if __name__ == '__main__':
-    app.run()
     
 # all event API below
 
@@ -227,3 +224,6 @@ def delete_registration(id):
     db.commit()
     
     return jsonify({"message": "Registration deleted"})
+
+if __name__ == '__main__':
+    app.run()
