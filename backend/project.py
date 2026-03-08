@@ -109,14 +109,16 @@ def add_event():
     cursor = db.cursor()
     
     query = """
-    INSERT INTO event (name, date, location)
-    VALUES (%s, %s, %s)
+    INSERT INTO event (id, name, capacity, level, date)
+    VALUES (%s, %s, %s, %s, %s)
     """
     
     cursor.execute(query, (
+        data['id'],
         data['name'],
-        data['date'],
-        data['location']
+        data['capacity'],
+        data['level'],
+        data['date']
     ))
     
     db.commit()
@@ -143,14 +145,15 @@ def update_event(id):
     
     query = """
     UPDATE event
-    SET name=%s, date=%s, location=%s
+    SET name=%s, capacity=%s, level=%s, date=%s
     WHERE id=%s
     """
     
     cursor.execute(query, (
         data['name'],
+        data['capacity'],
+        data['level'],
         data['date'],
-        data['location'],
         id
     ))
     
