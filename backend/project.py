@@ -109,7 +109,7 @@ def add_event():
     cursor = db.cursor()
     
     query = """
-    INSERT INTO event (id, name, capacity, level, date)
+    INSERT INTO event (name, capacity, level, date)
     VALUES (%s, %s, %s, %s, %s)
     """
     
