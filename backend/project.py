@@ -114,7 +114,6 @@ def add_event():
     """
     
     cursor.execute(query, (
-        data['id'],
         data['name'],
         data['capacity'],
         data['level'],
