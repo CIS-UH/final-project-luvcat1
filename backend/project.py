@@ -110,7 +110,7 @@ def add_event():
     
     query = """
     INSERT INTO event (name, capacity, level, date)
-    VALUES (%s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s)
     """
     
     cursor.execute(query, (
@@ -199,16 +199,7 @@ def add_registration():
 def get_registrations():
     cursor = db.cursor(dictionary=True)
     
-    query = """
-    SELECT
-        registration.id,
-        member.name AS member_name,
-        event.name AS event_name,
-        event.date
-    FROM registration
-    JOIN member ON registration.member_id = member.id
-    JOIN event ON registration.event_id = event.id
-    """
+    query = "SELECT id, event_id, member_id FROM registration"
     
     cursor.execute(query)
     
