@@ -30,6 +30,11 @@ DB_NAME = 'cis2368springdb'
 # creates the connection to the MySQL database
 db = create_con(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 
+# homepage
+@app.route('/')
+def home():
+    return jsonify({"message": "Flask API is running"})
+
 # all member API below
 
 # GET members API
