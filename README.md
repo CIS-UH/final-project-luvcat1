@@ -1,1 +1,3 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Ic9iTi2K)
+AI was used to fix the backend code to function with frontend.
+Since our original code created only 1 connection when initializing the server, Flask would crash every time we performed CRUD on members, events, and registrations.
