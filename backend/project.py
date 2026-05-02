@@ -35,19 +35,31 @@ db = create_con(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 def home():
     return jsonify({"message": "Flask API is running"})
 
+def get_db():
+    return mysql.connector.connect(
+        host='cis2368spring.cyzsyemwuyp7.us-east-1.rds.amazonaws.com',
+        user='admin',
+        password='8Iw&6FxI',
+        database='cis2368springdb'
+    )
+
 # all member API below
 
 # GET members API
 @app.route('/members', methods=['GET'])
 def get_members():
+    db = get_db()
     cursor = db.cursor(dictionary=True)
     cursor.execute("SELECT * FROM member")
     members = cursor.fetchall()
+    cursor.close()
+    db.close()
     return jsonify(members)
 
 # POST members API that includes their name, details, title, and level
 @app.route('/members', methods=['POST'])
 def add_members():
+    db = get_db()
     data = request.get_json()
     
     name = data['name']
@@ -64,12 +76,15 @@ def add_members():
     
     cursor.execute(query, (name, details, title, level))
     db.commit()
+    cursor.close()
+    db.close()
     return jsonify({"message": "Member added successfully"})
     
     
 # PUT members API that updates a member's name, details, title, and/or level
 @app.route('/members/<int:id>', methods=['PUT'])
 def update_member(id):
+    db = get_db()
     data = request.get_json()
     
     cursor = db.cursor()
@@ -89,19 +104,22 @@ def update_member(id):
     ))
     
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Member updated"})
 
 # DELETE member API if a member needs to be deleted from the database
 @app.route('/members/<int:id>', methods=['DELETE'])
 def delete_member(id):
+    db = get_db()
     cursor = db.cursor()
     
     query = "DELETE FROM member WHERE id=%s"
     
     cursor.execute(query, (id,))
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Member deleted"})
     
 # all event API below
@@ -109,6 +127,7 @@ def delete_member(id):
 # POST event API to create events
 @app.route('/events', methods=['POST'])
 def add_event():
+    db = get_db()
     data = request.get_json()
     
     cursor = db.cursor()
@@ -126,23 +145,27 @@ def add_event():
     ))
     
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Event created successfully"})
 
 # GET events API to retrieve all events
 @app.route('/events', methods=['GET'])
 def get_events():
+    db = get_db()
     cursor = db.cursor(dictionary=True)
     
     cursor.execute("SELECT * FROM event")
     
     events = cursor.fetchall()
-    
+    cursor.close()
+    db.close()
     return jsonify(events)
 
 # UPDATE events API to update existing events
 @app.route('/events/<int:id>', methods=['PUT'])
 def update_event(id):
+    db = get_db()
     data = request.get_json()
     
     cursor = db.cursor()
@@ -162,18 +185,21 @@ def update_event(id):
     ))
     
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Event updated successfully"})
 
 # DELETE events API to delete existing events
 @app.route('/events/<int:id>', methods=['DELETE'])
 def delete_event(id):
+    db = get_db()
     cursor = db.cursor()
     
     cursor.execute("DELETE FROM event WHERE id = %s", (id,))
     
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Event deleted successfully"})
 
 # all registration API below
@@ -181,6 +207,7 @@ def delete_event(id):
 # POST registration API to create registration
 @app.route('/registrations', methods=['POST'])
 def add_registration():
+    db = get_db()
     data = request.get_json()
     
     cursor = db.cursor()
@@ -196,12 +223,14 @@ def add_registration():
     ))
     
     db.commit()
-
+    cursor.close()
+    db.close()
     return jsonify({"message": "Registration successful"})
 
 # GET registration API to view registration
 @app.route('/registrations', methods=['GET'])
 def get_registrations():
+    db = get_db()
     cursor = db.cursor(dictionary=True)
     
     query = "SELECT id, event_id, member_id FROM registration"
@@ -209,18 +238,21 @@ def get_registrations():
     cursor.execute(query)
     
     registrations = cursor.fetchall()
-    
+    cursor.close()
+    db.close()
     return jsonify(registrations)
 
 # DELETE registration API to cancel registration
 @app.route('/registrations/<int:id>', methods=['DELETE'])
 def delete_registration(id):
+    db = get_db()
     cursor = db.cursor()
     
     cursor.execute("DELETE FROM registration WHERE id = %s", (id,))
     
     db.commit()
-    
+    cursor.close()
+    db.close()
     return jsonify({"message": "Registration deleted"})
 
 if __name__ == '__main__':
