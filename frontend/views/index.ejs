@@ -1,94 +1,467 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VIP Event &amp; Membership Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<h2>Members</h2>
+    :root {
+      --bg:        #f4f2ed;
+      --surface:   #ffffff;
+      --border:    #e3ddd5;
+      --text:      #1c1814;
+      --muted:     #7c756c;
+      --accent:    #bf3a2b;
+      --acc-lt:    #fdf1f0;
+      --blue:      #1a4d8f;
+      --r:         10px;
+      --shadow:    0 2px 14px rgba(0,0,0,.07);
+      --bronze:    #a0522d;
+      --bronze-lt: #fdf3ec;
+      --silver:    #607080;
+      --silver-lt: #f0f3f6;
+      --gold:      #b8860b;
+      --gold-lt:   #fdf8e1;
+    }
 
-<form action="/members/add" method="POST">
-  <input name="name" placeholder="Name">
-  <input name="details" placeholder="Details">
-  <input name="title" placeholder="Title">
-  <input name="level" placeholder="Level">
-  <button>Add</button>
-</form>
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-<ul>
-    <% members.forEach(m => { %>
-      <li>
-        <%= m.name %> - <%= m.title %>
+    header {
+      background: var(--text); color: #fff; height: 58px; padding: 0 2rem;
+      display: flex; align-items: center; gap: 1rem;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    }
+    header h1 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; letter-spacing: .01em; }
+    .nav-tabs { margin-left: auto; display: flex; gap: .2rem; }
+    .nav-tabs button {
+      font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500;
+      background: transparent; border: none; color: rgba(255,255,255,.55);
+      padding: .4rem .9rem; border-radius: 6px; cursor: pointer; transition: background .15s, color .15s;
+    }
+    .nav-tabs button:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .nav-tabs button.active { background: var(--accent); color: #fff; }
 
-        <form action="/members/delete/<%= m.id %>" method="POST">
-          <button>Delete</button>
-        </form>
-      </li>
-    <% }) %>
-</ul>
+    main { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .panel { display: none; }
+    .panel.active { display: block; }
 
-<ul>
-<% members.forEach(m => { %>
-  <li>
-    <form action="/members/update/<%= m.id %>" method="POST">
-      <input name="name" value="<%= m.name %>">
-      <input name="details" value="<%= m.details %>">
-      <input name="title" value="<%= m.title %>">
-      <input name="level" value="<%= m.level %>">
+    .panel-header { display: flex; align-items: baseline; gap: .65rem; margin-bottom: 1.4rem; }
+    .panel-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.55rem; }
+    .badge {
+      font-size: .72rem; font-weight: 600; background: var(--border);
+      color: var(--muted); padding: .18rem .55rem; border-radius: 20px;
+    }
 
-      <button type="submit">Update</button>
-    </form>
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); box-shadow: var(--shadow); padding: 1.4rem 1.5rem; margin-bottom: 1rem;
+    }
+    .card-label {
+      font-size: .72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin-bottom: .9rem;
+    }
 
-    <form action="/members/delete/<%= m.id %>" method="POST">
-      <button>Delete</button>
-    </form>
-  </li>
-<% }) %>
-</ul>
+    .form-row { display: flex; flex-wrap: wrap; gap: .65rem; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: .28rem; flex: 1; min-width: 130px; }
+    label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .055em; color: var(--muted); }
+    input, select {
+      font-family: 'DM Sans', sans-serif; font-size: .88rem;
+      border: 1px solid var(--border); border-radius: 6px; padding: .48rem .75rem;
+      background: var(--bg); color: var(--text); transition: border-color .15s, box-shadow .15s; width: 100%;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(191,58,43,.11); }
+    input::placeholder { color: #bbb; }
 
-<h2>Events</h2>
+    .btn {
+      font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600;
+      padding: .52rem 1.1rem; border-radius: 6px; border: none; cursor: pointer;
+      transition: opacity .15s, transform .1s; white-space: nowrap;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary      { background: var(--accent); color: #fff; }
+    .btn-outline-red  { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .btn-outline-blue { background: transparent; color: var(--blue);   border: 1px solid #b0c4e0; }
+    .btn-sm { font-size: .78rem; padding: .32rem .7rem; }
 
-<form action="/events/add" method="POST">
-  <input name="name" placeholder="Event Name">
-  <input name="capacity" placeholder="Capacity">
-  <input name="level" placeholder="Level">
-  <input name="date" placeholder="YYYY-MM-DD">
-  <button>Add Event</button>
-</form>
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    thead th {
+      text-align: left; font-size: .7rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .07em; padding: .55rem .75rem; border-bottom: 2px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg); }
+    td { padding: .6rem .75rem; vertical-align: middle; }
+    .actions { display: flex; gap: .35rem; }
 
-<ul>
-<% events.forEach(e => { %>
-  <li>
-    <form action="/events/update/<%= e.id %>" method="POST">
-      <input name="name" value="<%= e.name %>">
-      <input name="capacity" value="<%= e.capacity %>">
-      <input name="level" value="<%= e.level %>">
-      <input name="date" value="<%= e.date %>">
+    .tag {
+      display: inline-block; font-size: .7rem; font-weight: 600;
+      padding: .18rem .52rem; border-radius: 20px;
+    }
+    .tag-1 { background: var(--bronze-lt); color: var(--bronze); }
+    .tag-2 { background: var(--silver-lt); color: var(--silver); }
+    .tag-3 { background: var(--gold-lt);   color: var(--gold);   }
 
-      <button>Update</button>
-    </form>
+    .edit-row { display: none; background: #fafaf8; }
+    .edit-row.open { display: table-row; }
+    .edit-row td { padding: .7rem .75rem; }
+    .edit-form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: flex-end; }
+    .edit-form .field { min-width: 110px; }
 
-    <form action="/events/delete/<%= e.id %>" method="POST">
-      <button>Delete</button>
-    </form>
-  </li>
-<% }) %>
-</ul>
+    .alert {
+      display: none; padding: .65rem 1rem; border-radius: 6px; font-size: .85rem;
+      margin-bottom: .75rem; font-weight: 500;
+    }
+    .alert.show { display: block; }
+    .alert-error { background: var(--acc-lt); color: var(--accent); border: 1px solid #f5c0b8; }
 
-<h2>Registrations</h2>
+    .empty { text-align: center; color: var(--muted); padding: 2.2rem 1rem; font-size: .9rem; }
 
-<form action="/registrations/add" method="POST">
-  <input name="member_id" placeholder="Member ID">
-  <input name="event_id" placeholder="Event ID">
-  <button>Register</button>
-</form>
+    .cap-bar { display: flex; align-items: center; gap: .5rem; }
+    .cap-fill { height: 6px; border-radius: 3px; background: var(--border); flex: 1; overflow: hidden; }
+    .cap-fill-inner { height: 100%; border-radius: 3px; background: var(--accent); }
+    .cap-label { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+  </style>
+</head>
+<body>
 
-<ul>
-<% registrations.forEach(r => { %>
-  <li>
-    Member <%= r.member_id %> → Event <%= r.event_id %>
+<header>
+  <h1>VIP Event &amp; Membership Manager</h1>
+  <nav class="nav-tabs">
+    <button class="active" onclick="showTab('members', this)">Members</button>
+    <button onclick="showTab('events', this)">Events</button>
+    <button onclick="showTab('registrations', this)">Registrations</button>
+  </nav>
+</header>
 
-    <form action="/registrations/delete/<%= r.id %>" method="POST">
-      <button>Cancel</button>
-    </form>
-  </li>
-<% }) %>
-</ul>
+<main>
 
+  <!-- ══════════════ MEMBERS ══════════════ -->
+  <div id="members" class="panel active">
+    <div class="panel-header">
+      <h2>Members</h2>
+      <span class="badge"><%= members.length %></span>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Add Member</div>
+      <form action="/members/add" method="POST">
+        <div class="form-row">
+          <div class="field"><label>Name</label><input name="name" placeholder="Jane Doe" required></div>
+          <div class="field"><label>Details</label><input name="details" placeholder="Short bio or notes"></div>
+          <div class="field"><label>Title</label><input name="title" placeholder="e.g. VIP Guest"></div>
+          <div class="field"><label>Membership Tier</label>
+            <select name="level" required>
+              <option value="" disabled selected>Select tier…</option>
+              <option value="Bronze">🥉 Bronze</option>
+              <option value="Silver">🥈 Silver</option>
+              <option value="Gold">🥇 Gold</option>
+            </select>
+          </div>
+          <div class="field" style="flex:0">
+            <button type="submit" class="btn btn-primary">Add Member</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Name</th><th>Title</th><th>Tier</th><th>Details</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% if (!members.length) { %>
+              <tr><td colspan="6"><div class="empty">No members yet. Add one above.</div></td></tr>
+            <% } %>
+            <% members.forEach(function(m) { %>
+            <% var mTierLabel = m.level === 'Bronze' ? '🥉 Bronze' : m.level === 'Silver' ? '🥈 Silver' : m.level === 'Gold' ? '🥇 Gold' : m.level;
+               var mTagClass  = m.level === 'Bronze' ? 'tag-1' : m.level === 'Silver' ? 'tag-2' : 'tag-3'; %>
+            <tr>
+              <td style="color:var(--muted)"><%= m.id %></td>
+              <td><strong><%= m.name %></strong></td>
+              <td><%= m.title || '—' %></td>
+              <td><span class="tag <%= mTagClass %>"><%= mTierLabel %></span></td>
+              <td style="color:var(--muted);font-size:.83rem;max-width:200px"><%= m.details || '—' %></td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline-blue btn-sm" onclick="toggleEdit('m-<%= m.id %>')">Edit</button>
+                  <form action="/members/delete/<%= m.id %>" method="POST" onsubmit="return confirm('Delete <%= m.name %>?')">
+                    <button class="btn btn-outline-red btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr id="m-<%= m.id %>" class="edit-row">
+              <td colspan="6">
+                <form action="/members/update/<%= m.id %>" method="POST" class="edit-form">
+                  <div class="field"><label>Name</label><input name="name" value="<%= m.name %>" required></div>
+                  <div class="field"><label>Details</label><input name="details" value="<%= m.details %>"></div>
+                  <div class="field"><label>Title</label><input name="title" value="<%= m.title %>"></div>
+                  <div class="field"><label>Tier</label>
+                    <select name="level">
+                      <option value="Bronze" <%=m.level==='Bronze'?'selected':''%>>🥉 Bronze</option>
+                      <option value="Silver" <%=m.level==='Silver'?'selected':''%>>🥈 Silver</option>
+                      <option value="Gold" <%=m.level==='Gold'?'selected':''%>>🥇 Gold</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                  <button type="button" class="btn btn-outline-red btn-sm" onclick="toggleEdit('m-<%= m.id %>')">Cancel</button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ EVENTS ══════════════ -->
+  <div id="events" class="panel">
+    <div class="panel-header">
+      <h2>Events</h2>
+      <span class="badge"><%= events.length %></span>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Add Event</div>
+      <form action="/events/add" method="POST">
+        <div class="form-row">
+          <div class="field"><label>Event Name</label><input name="name" placeholder="Gala Night" required></div>
+          <div class="field"><label>Capacity</label><input name="capacity" type="number" min="1" placeholder="50" required></div>
+          <div class="field"><label>Required Tier</label>
+            <select name="level" required>
+              <option value="" disabled selected>Select tier…</option>
+              <option value="Bronze">🥉 Bronze (anyone)</option>
+              <option value="Silver">🥈 Silver (Silver &amp; Gold)</option>
+              <option value="Gold">🥇 Gold (Gold only)</option>
+            </select>
+          </div>
+          <div class="field"><label>Date</label><input name="date" type="date" required></div>
+          <div class="field" style="flex:0">
+            <button type="submit" class="btn btn-primary">Add Event</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Name</th><th>Date</th><th>Capacity</th><th>Required Tier</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% if (!events.length) { %>
+              <tr><td colspan="6"><div class="empty">No events yet. Add one above.</div></td></tr>
+            <% } %>
+            <% events.forEach(function(e) { %>
+            <%
+              var regCount  = registrations.filter(function(r) { return r.event_id === e.id; }).length;
+              var capPct    = Math.min(100, Math.round((regCount / e.capacity) * 100));
+              var tierLabel = e.level === 'Bronze' ? '🥉 Bronze' : e.level === 'Silver' ? '🥈 Silver' : e.level === 'Gold' ? '🥇 Gold' : e.level;
+              var eTagClass = e.level === 'Bronze' ? 'tag-1' : e.level === 'Silver' ? 'tag-2' : 'tag-3';
+            %>
+            <tr>
+              <td style="color:var(--muted)"><%= e.id %></td>
+              <td><strong><%= e.name %></strong></td>
+              <td><%= e.date || '—' %></td>
+              <td>
+                <div class="cap-bar">
+                  <div class="cap-fill"><div class="cap-fill-inner" style="width:<%= capPct %>%"></div></div>
+                  <span class="cap-label"><%= regCount %>/<%= e.capacity %></span>
+                </div>
+              </td>
+              <td><span class="tag <%= eTagClass %>"><%= tierLabel %></span></td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-outline-blue btn-sm" onclick="toggleEdit('e-<%= e.id %>')">Edit</button>
+                  <form action="/events/delete/<%= e.id %>" method="POST" onsubmit="return confirm('Delete <%= e.name %>?')">
+                    <button class="btn btn-outline-red btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr id="e-<%= e.id %>" class="edit-row">
+              <td colspan="6">
+                <form action="/events/update/<%= e.id %>" method="POST" class="edit-form">
+                  <div class="field"><label>Name</label><input name="name" value="<%= e.name %>" required></div>
+                  <div class="field"><label>Capacity</label><input name="capacity" type="number" value="<%= e.capacity %>" required></div>
+                  <div class="field"><label>Required Tier</label>
+                    <select name="level">
+                      <option value="Bronze" <%=e.level==='Bronze'?'selected':''%>>🥉 Bronze</option>
+                      <option value="Silver" <%=e.level==='Silver'?'selected':''%>>🥈 Silver</option>
+                      <option value="Gold" <%=e.level==='Gold'?'selected':''%>>🥇 Gold</option>
+                    </select>
+                  </div>
+                  <div class="field"><label>Date</label><input name="date" type="date" value="<%= e.date %>"></div>
+                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                  <button type="button" class="btn btn-outline-red btn-sm" onclick="toggleEdit('e-<%= e.id %>')">Cancel</button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ REGISTRATIONS ══════════════ -->
+  <div id="registrations" class="panel">
+    <div class="panel-header">
+      <h2>Registrations</h2>
+      <span class="badge"><%= registrations.length %></span>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Register Member for Event</div>
+      <div id="reg-alert" class="alert alert-error"></div>
+      <form action="/registrations/add" method="POST" id="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Member</label>
+            <select name="member_id" id="reg-member" required onchange="filterEvents()">
+              <option value="" disabled selected>Select member…</option>
+              <% members.forEach(function(m) {
+                var tl = m.level === 'Bronze' ? '🥉 Bronze' : m.level === 'Silver' ? '🥈 Silver' : '🥇 Gold';
+              %>
+                <option value="<%= m.id %>" data-level="<%= m.level %>"><%= m.name %> (<%= tl %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="field">
+            <label>Event</label>
+            <select name="event_id" id="reg-event" required>
+              <option value="" disabled selected>Select member first…</option>
+            </select>
+          </div>
+          <div class="field" style="flex:0">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Member</th><th>Member Tier</th><th>Event</th><th>Event Tier</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% if (!registrations.length) { %>
+              <tr><td colspan="6"><div class="empty">No registrations yet.</div></td></tr>
+            <% } %>
+            <% registrations.forEach(function(r) {
+                var member = members.find(function(m) { return m.id === r.member_id; });
+                var event  = events.find(function(e) { return e.id === r.event_id; });
+                var mTier     = member ? (member.level === 'Bronze' ? '🥉 Bronze' : member.level === 'Silver' ? '🥈 Silver' : '🥇 Gold') : '—';
+                var eTier     = event  ? (event.level  === 'Bronze' ? '🥉 Bronze' : event.level  === 'Silver' ? '🥈 Silver' : '🥇 Gold') : '—';
+                var mTagClass = member ? (member.level === 'Bronze' ? 'tag-1' : member.level === 'Silver' ? 'tag-2' : 'tag-3') : '';
+                var eTagClass = event  ? (event.level  === 'Bronze' ? 'tag-1' : event.level  === 'Silver' ? 'tag-2' : 'tag-3') : '';
+            %>
+            <tr>
+              <td style="color:var(--muted)"><%= r.id %></td>
+              <td><strong><%= member ? member.name : 'Member #' + r.member_id %></strong></td>
+              <td><% if (member) { %><span class="tag <%= mTagClass %>"><%= mTier %></span><% } else { %>—<% } %></td>
+              <td><%= event ? event.name : 'Event #' + r.event_id %></td>
+              <td><% if (event) { %><span class="tag <%= eTagClass %>"><%= eTier %></span><% } else { %>—<% } %></td>
+              <td>
+                <form action="/registrations/delete/<%= r.id %>" method="POST" onsubmit="return confirm('Cancel this registration?')">
+                  <button class="btn btn-outline-red btn-sm">Cancel</button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Pass server data to client JS -->
+<script>
+  var existingRegistrations = <%- JSON.stringify(registrations) %>;
+  var allEvents = <%- JSON.stringify(events) %>;
+
+  function showTab(name, btn) {
+    var panels = document.querySelectorAll('.panel');
+    for (var i = 0; i < panels.length; i++) { panels[i].classList.remove('active'); }
+    var buttons = document.querySelectorAll('.nav-tabs button');
+    for (var i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active'); }
+    document.getElementById(name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggleEdit(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  function filterEvents() {
+    var memberSel   = document.getElementById('reg-member');
+    var eventSel    = document.getElementById('reg-event');
+    var alertEl     = document.getElementById('reg-alert');
+    var selectedOpt = memberSel.options[memberSel.selectedIndex];
+    var memberLevel = selectedOpt.dataset.level;
+    var memberId    = parseInt(memberSel.value, 10);
+
+    var tierRank = { 'Bronze': 1, 'Silver': 2, 'Gold': 3 };
+
+    alertEl.classList.remove('show');
+    eventSel.innerHTML = '<option value="" disabled selected>Select event…</option>';
+
+    var anyAvailable = false;
+
+    for (var i = 0; i < allEvents.length; i++) {
+      var ev         = allEvents[i];
+      var regCount   = 0;
+
+      for (var j = 0; j < existingRegistrations.length; j++) {
+        if (existingRegistrations[j].event_id === ev.id) { regCount++; }
+      }
+
+      var isFull     = regCount >= ev.capacity;
+      var alreadyReg = false;
+      for (var k = 0; k < existingRegistrations.length; k++) {
+        if (existingRegistrations[k].member_id === memberId && existingRegistrations[k].event_id === ev.id) {
+          alreadyReg = true;
+          break;
+        }
+      }
+
+      /* Tier gate: member level must be >= event level */
+      if ((tierRank[memberLevel] || 0) < (tierRank[ev.level] || 0)) { continue; }
+      /* Skip events the member is already registered for */
+      if (alreadyReg) { continue; }
+
+      var tierLabel = ev.level === 'Bronze' ? '🥉 Bronze' : ev.level === 'Silver' ? '🥈 Silver' : '🥇 Gold';
+      var label     = ev.name + ' — ' + tierLabel + (isFull ? ' (Full)' : ' (' + regCount + '/' + ev.capacity + ')');
+
+      var newOpt      = document.createElement('option');
+      newOpt.value    = ev.id;
+      newOpt.disabled = isFull;
+      newOpt.textContent = label;
+      eventSel.appendChild(newOpt);
+
+      if (!isFull) { anyAvailable = true; }
+    }
+
+    if (!anyAvailable) {
+      alertEl.textContent = 'No eligible events for this member — tier too low, already registered, or all matching events are full.';
+      alertEl.classList.add('show');
+    }
+  }
+</script>
+
+</body>
 </html>
